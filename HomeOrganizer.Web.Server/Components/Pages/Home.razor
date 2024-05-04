@@ -1,3 +1,77 @@
 ﻿@page "/"
+@using HomeOrganizer.Logic.Models.Food
+@rendermode InteractiveServer
 
 <PageTitle>Storage overview</PageTitle>
+
+<button @onclick="LoadStorage">Load storage</button>
+<button @onclick="ShowExplosion">Show explosion</button>
+
+@if (_showExplosion)
+{
+    <div>
+        @if (_isButtonExplosion)
+        {
+            <img src="https://media.giphy.com/media/zYMYkTGOaMoZnw8jiA/giphy.gif?cid=790b7611t93qucfxu9nxk2gcjtnkndnxzmy61fc6i8h2op84&ep=v1_gifs_search&rid=giphy.gif&ct=g"/>
+        }
+        else
+        {
+            <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExem1iZnRhZ3lhczY2MHJveDYyYTgzc203YWttMmg5emsydmdlNTFjOCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/oe33xf3B50fsc/giphy.gif" />
+        }
+    </div>
+}
+
+@if (_storage != null)
+{
+    @foreach (var entry in _storage.StorageEntries)
+    {
+        <div class="flex-container ">
+            <p>
+                Type:
+            </p>
+            <div>
+                @if (entry.StorageItem is IFruit fruit)
+                {
+                    @fruit.FruitType
+                }
+                else if (entry.StorageItem is IMeat meat)
+                {
+                    @meat.MeatType
+                }
+                else if (entry.StorageItem is IVegetables vegetables)
+                {
+                    @vegetables.VegetableType
+                    <div>
+                        <img src="https://i.pinimg.com/564x/6b/90/5d/6b905d83c88aeed0ee4e99e02c1ca29b.jpg" />
+                    </div>
+                }
+                else
+                {
+                    <div>
+                        Missing entry or not implemented
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="flex-container ">
+            <p>
+                Actual count:
+            </p>
+            <div>
+                @entry.ActualCount
+            </div>
+        </div>
+
+        <div class="flex-container ">
+            <p>
+                Preferred count:
+            </p>
+            <div>
+                @entry.PreferredCount
+            </div>
+        </div>
+        
+     
+    }
+}

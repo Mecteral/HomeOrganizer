@@ -2,6 +2,7 @@
 
 public interface IStorageEntry
 {
-    public int PreferredCount { get; set; }
-    public int ActualCount { get; set; }
+    int PreferredCount { get; set; }
+    int ActualCount { get; set; }
+    IStorageItem StorageItem { get; set; }
 }
