@@ -1,11 +1,10 @@
 ﻿@page "/"
-@using HomeOrganizer.Logic.Models.Food
 @rendermode InteractiveServer
 
 <PageTitle>Storage overview</PageTitle>
 
-<button @onclick="LoadStorage">Load storage</button>
-<button @onclick="ShowExplosion">Show explosion</button>
+<button class="btn-primary" @onclick="LoadStorage">Load storage</button>
+<button class="btn-primary" @onclick="ShowExplosion">Show explosion</button>
 
 @if (_showExplosion)
 {
@@ -21,57 +20,29 @@
     </div>
 }
 
+@if (_isLoading)
+{
+    <div class="lds-circle">
+        <div></div>
+    </div>
+}
+
+
 @if (_storage != null)
 {
-    @foreach (var entry in _storage.StorageEntries)
-    {
-        <div class="flex-container ">
-            <p>
-                Type:
-            </p>
-            <div>
-                @if (entry.StorageItem is IFruit fruit)
-                {
-                    @fruit.FruitType
-                }
-                else if (entry.StorageItem is IMeat meat)
-                {
-                    @meat.MeatType
-                }
-                else if (entry.StorageItem is IVegetables vegetables)
-                {
-                    @vegetables.VegetableType
-                    <div>
-                        <img src="https://i.pinimg.com/564x/6b/90/5d/6b905d83c88aeed0ee4e99e02c1ca29b.jpg" />
-                    </div>
-                }
-                else
-                {
-                    <div>
-                        Missing entry or not implemented
-                    </div>
-                }
-            </div>
-        </div>
-
-        <div class="flex-container ">
-            <p>
-                Actual count:
-            </p>
-            <div>
-                @entry.ActualCount
-            </div>
-        </div>
-
-        <div class="flex-container ">
-            <p>
-                Preferred count:
-            </p>
-            <div>
-                @entry.PreferredCount
-            </div>
-        </div>
-        
-     
-    }
+    <table>
+        <tr>
+            <th>Type</th>
+            <th>Actual count</th>
+            <th>Preferred count</th>
+        </tr>
+        @foreach (var entry in _storage.StorageEntries)
+        {
+            <tr>
+                <td>@GetItemType(@entry.StorageItem)</td>
+                <td>@entry.ActualCount</td>
+                <td>@entry.PreferredCount</td>
+            </tr>
+        }
+    </table>
 }
