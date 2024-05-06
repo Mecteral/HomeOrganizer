@@ -3,7 +3,20 @@
 
 <PageTitle>Storage overview</PageTitle>
 
-<button class="btn-primary" @onclick="LoadStorage">Load storage</button>
+<button class="btn-primary" @onclick="LoadStorage">
+    @if (_isLoading)
+    {
+        <div class="lds-circle">
+            <div></div>
+        </div>
+    }
+    else
+    {
+        <div>
+            Load storage
+        </div>
+    }
+</button>
 <button class="btn-primary" @onclick="ShowExplosion">Show explosion</button>
 
 @if (_showExplosion)
@@ -20,12 +33,7 @@
     </div>
 }
 
-@if (_isLoading)
-{
-    <div class="lds-circle">
-        <div></div>
-    </div>
-}
+
 
 
 @if (_storage != null)
