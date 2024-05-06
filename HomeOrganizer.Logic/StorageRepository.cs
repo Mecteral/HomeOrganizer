@@ -1,41 +1,92 @@
-﻿using HomeOrganizer.Logic.Models;
+﻿using System;
+using System.IO;
+using System.Linq;
+using HomeOrganizer.Logic.Models;
 using HomeOrganizer.Logic.Models.Food;
+using Newtonsoft.Json;
 
 namespace HomeOrganizer.Logic;
 
 public class StorageRepository : IStorageRepository
 {
+    private readonly string _filePath;
+    public StorageRepository()
+    {
+        var userPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        var folderPath = Path.Combine(userPath, "HomeOrganizer");
+        _filePath = Path.Combine(folderPath, "Storages.json");
+
+        if (!Directory.Exists(folderPath))
+            Directory.CreateDirectory(folderPath);
+        if (!File.Exists(_filePath))
+            File.Create(_filePath);
+    }
+
     public Storage GetStorage(string key)
     {
-        return new Storage("First")
+        var storages = GetStorages();
+        foreach (var storage in storages)
+        {
+            if (storage.Key == key)
+                return storage;
+        }
+        // Default returns if no storage was found
+        var result =  new Storage(key)
         {
             StorageEntries = new IStorageEntry[]
             {
                 new StorageEntry()
                 {
-                    PreferredCount = 13,
-                    ActualCount = 7,
-                    StorageItem = new Meat(MeatType.Chop)
-                },
-                new StorageEntry()
-                {
-                    PreferredCount = 200,
-                    ActualCount = 218,
-                    StorageItem = new Meat(MeatType.Steak)
-                },
-                new StorageEntry()
-                {
-                    PreferredCount = 1,
-                    ActualCount = 2,
-                    StorageItem = new Vegetables(VegetableType.Carrot)
-                },
-                new StorageEntry()
-                {
-                    PreferredCount = 8,
-                    ActualCount = 700185,
-                    StorageItem = new Fruit(FruitType.Grapefruit)
+                    StorageItem = new Fruit(FruitType.Grapefruit),
+                    ActualCount = 0,
+                    PreferredCount = 0
                 }
             }
         };
+        SaveStorage(result);
+        return result;
+    }
+
+    public Storage[] GetStorages()
+    {
+        var storageJson = File.ReadAllText(_filePath);
+        if (string.IsNullOrWhiteSpace(storageJson))
+            return new Storage[]
+            {
+                
+            };
+
+        return JsonConvert.DeserializeObject<Storage[]>(storageJson, new JsonSerializerSettings()
+        {
+            Formatting = Formatting.Indented,
+            TypeNameHandling = TypeNameHandling.Objects
+        });
+    }
+
+    public void SaveStorage(Storage storage)
+    {
+        var storages = GetStorages();
+        Storage storageToSave = null;
+        foreach (var savedStorage in storages)
+        {
+            if (savedStorage.Key == storage.Key)
+            {
+                storageToSave = savedStorage;
+                storageToSave.StorageEntries = storage.StorageEntries;
+            }
+        }
+
+        if (storageToSave == null)
+        {
+            var storageList = storages.ToList();
+            storageList.Add(storage);
+            storages = storageList.ToArray();
+        }
+        var text = JsonConvert.SerializeObject(storages, new JsonSerializerSettings()
+        {
+            TypeNameHandling = TypeNameHandling.Objects,
+            Formatting = Formatting.Indented
+        });
+        File.WriteAllText(_filePath, text);
     }
 }

@@ -43,6 +43,7 @@
             <th>Type</th>
             <th>Actual count</th>
             <th>Preferred count</th>
+            <th>Commands</th>
         </tr>
         @foreach (var entry in _storage.StorageEntries)
         {
@@ -50,6 +51,14 @@
                 <td>@GetItemType(@entry.StorageItem)</td>
                 <td>@entry.ActualCount</td>
                 <td>@entry.PreferredCount</td>
+                <td>
+                    <button class="btn-primary" @onclick="@(() => Increase(entry))">
+                        +
+                    </button>
+                    <button class="btn-primary" @onclick="@(() => Decrease(entry))">
+                        -
+                    </button>
+                </td>
             </tr>
         }
     </table>

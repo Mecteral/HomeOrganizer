@@ -1,8 +1,10 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using HomeOrganizer.Logic;
 using HomeOrganizer.Logic.Models;
 using HomeOrganizer.Logic.Models.Food;
+using Microsoft.AspNetCore.Components;
 
 namespace HomeOrganizer.Web.Server.Components.Pages;
 
@@ -13,18 +15,23 @@ public partial class Home
     private bool _isButtonExplosion;
     private Storage _storage;
     private IStorageEntry[] _itemsWithMissingCount;
-    
-    private readonly IStorageRepository _storageRepository 
-        = new StorageRepository();
 
-    private readonly IStorageManager _storageManager
-        = new StorageManager();
+    [Inject] 
+    public IStorageRepository StorageRepository { get; set; }
+
+
+    private readonly IStorageManager _storageManager;
+
+    public Home()
+    {
+        _storageManager = new StorageManager();
+    }
     async Task LoadStorage()
     {
         _isLoading = true;
         StateHasChanged();
-        await Task.Delay(2000);
-        _storage = _storageRepository.GetStorage("");
+       
+        _storage = StorageRepository.GetStorage("");
         _itemsWithMissingCount 
             = _storageManager
                 .GetEntriesThatWeNeedToFillUpAgain(_storage);
@@ -47,4 +54,17 @@ public partial class Home
             IVegetables vegetables => vegetables.VegetableType.ToString(),
             _ => throw new ArgumentOutOfRangeException(nameof(item))
         };
+
+
+    private void Increase(IStorageEntry entry)
+    {
+        entry.ActualCount++;
+        StorageRepository.SaveStorage(_storage);
+    }
+
+    private void Decrease(IStorageEntry entry)
+    {
+        entry.ActualCount--;
+        StorageRepository.SaveStorage(_storage);
+    }
 }
