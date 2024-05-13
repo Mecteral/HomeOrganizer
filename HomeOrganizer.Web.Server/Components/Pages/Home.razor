@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using System.Diagnostics.Eventing.Reader
 @rendermode InteractiveServer
 
 <PageTitle>Storage overview</PageTitle>
@@ -62,4 +63,78 @@
             </tr>
         }
     </table>
+
+    <div>
+        <button @onclick="ShowAddFruit">
+            Add fruit
+        </button>
+
+        <button @onclick="ShowAddMeat">
+            Add meat
+        </button>
+        
+        <button @onclick="ShowAddVegetable">
+            Add vegetable
+        </button>
+    </div>
+
+    @if (_isAddingVegetable || _isAddingMeat || _isAddingFruit)
+    {
+        <div>
+            @if (_isAddingVegetable)
+            {
+                <select @bind="_selectedVegetableType">
+                    @foreach (var type in _vegetableTypes)
+                    {
+                        <option value="@type">
+                            @type.ToString()
+                        </option>
+                    }
+                </select>
+            }
+            else if (_isAddingMeat)
+            {
+                <select @bind="_selectedMeatType">
+                    @foreach (var type in _meatTypes)
+                    {
+                        <option value="@type">
+                            @type.ToString()
+                        </option>
+                    }
+                </select>
+            }
+            else if (_isAddingFruit)
+            {
+                <select @bind="_selectedFruitType">
+                    @foreach (var type in _fruitTypes)
+                    {
+                        <option value="@type">
+                            @type.ToString()
+                        </option>
+                    }
+                </select>
+            }
+            
+            <input type="number" @bind="_actualCount" min="0" max="@int.MaxValue"/>
+            <input type="number" @bind="_preferredCount" min="0" max="@int.MaxValue"/>
+            @if (_isAddingVegetable)
+            {
+                <button @onclick="AddVegetableEntry">
+                    +
+                </button>
+            }
+            else if (_isAddingMeat)
+            {
+                <button @onclick="AddMeatEntry">
+                    +
+                </button>
+            }
+            else if (_isAddingFruit)
+            {
+                <button @onclick="AddFruitEntry">
+                    +
+                </button>
+            }
+        </div>
+    }
 }
