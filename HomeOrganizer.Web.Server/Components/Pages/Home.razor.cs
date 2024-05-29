@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using HomeOrganizer.Logic;
@@ -16,8 +14,6 @@ public partial class Home
     private bool _showExplosion;
     private bool _isButtonExplosion;
     private Storage _storage;
-    private IStorageEntry[] _itemsWithMissingCount;
-    private readonly FruitType[] _fruitTypes;
     private readonly IStorageManager _storageManager;
     private FruitType _selectedFruitType;
     private MeatType _selectedMeatType;
@@ -27,8 +23,9 @@ public partial class Home
     private bool _isAddingVegetable;
     private int _actualCount;
     private int _preferredCount;
-    private readonly VegetableType[] _vegetableTypes;
-    private readonly MeatType[] _meatTypes;
+    private VegetableType[] _availableVegetableTypes;
+    private MeatType[] _availableMeatTypes;
+    private FruitType[] _availableFruitTypes;
 
     [Inject] 
     public IStorageRepository StorageRepository { get; set; }
@@ -36,22 +33,53 @@ public partial class Home
     public Home()
     {
         _storageManager = new StorageManager();
-        _fruitTypes = Enum.GetValues<FruitType>();
-        _vegetableTypes = Enum.GetValues<VegetableType>();
-        _meatTypes = Enum.GetValues<MeatType>();
+        _availableFruitTypes = Enum.GetValues<FruitType>();
+        _availableVegetableTypes = Enum.GetValues<VegetableType>();
+        _availableMeatTypes = Enum.GetValues<MeatType>();
     }
 
-    async Task LoadStorage()
+    void LoadStorage()
     {
-        _isLoading = true;
+        var storage = StorageRepository.GetStorage("");
+        _availableFruitTypes = Enum.GetValues<FruitType>()
+            .Where(isFruitTypeStillAvailable)
+            .ToArray();
+
+        _availableMeatTypes = Enum.GetValues<MeatType>()
+            .Where(isMeatTypeStillAvailable)
+            .ToArray();
+
+        _availableVegetableTypes = Enum.GetValues<VegetableType>()
+            .Where(isVegetableTypeStillAvailable)
+            .ToArray();
+
+        _selectedVegetableType = _availableVegetableTypes.FirstOrDefault();
+        _selectedMeatType = _availableMeatTypes.FirstOrDefault();
+        _selectedFruitType = _availableFruitTypes.FirstOrDefault();
+
+        _storage = storage;
         StateHasChanged();
-       
-        _storage = StorageRepository.GetStorage("");
-        _itemsWithMissingCount 
-            = _storageManager
-                .GetEntriesThatWeNeedToFillUpAgain(_storage);
-        _isLoading = false;
+        return;
+
+        bool isFruitTypeStillAvailable(FruitType type) =>
+            storage.StorageEntries
+                .Select(e => e.StorageItem)
+                .OfType<IFruit>()
+                .All(fruit => fruit.FruitType != type);
+
+        bool isMeatTypeStillAvailable(MeatType type) =>
+            storage.StorageEntries
+                .Select(e => e.StorageItem)
+                .OfType<IMeat>()
+                .All(meat => meat.MeatType != type);
+
+        bool isVegetableTypeStillAvailable(VegetableType type) =>
+            storage.StorageEntries
+                .Select(e => e.StorageItem)
+                .OfType<IVegetables>()
+                .All(vegetables => vegetables.VegetableType != type);
     }
+
     async Task ShowExplosion()
     {
         _isButtonExplosion = true;
@@ -131,5 +159,19 @@ public partial class Home
         _storage.StorageEntries = currentEntries.ToArray();
 
         StorageRepository.SaveStorage(_storage);
+        LoadStorage();
+    }
+
+    private bool HasMissingCount(IStorageEntry entry) 
+        => entry.ActualCount < entry.PreferredCount;
+
+    private void Remove(IStorageEntry entry)
+    {
+        var currentEntries = _storage.StorageEntries.ToList();
+        currentEntries.Remove(entry);
+        _storage.StorageEntries = currentEntries.ToArray();
+        
+        StorageRepository.SaveStorage(_storage);
+        LoadStorage();
     }
 }

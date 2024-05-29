@@ -2,9 +2,9 @@
 
 public class Meat : IMeat
 {
-    public Meat(MeatType type)
+    public Meat(MeatType meatType)
     {
-        MeatType = type;
+        MeatType = meatType;
     }
 
     public MeatType MeatType { get; }

@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using HomeOrganizer.Logic.Models;
-using HomeOrganizer.Logic.Models.Food;
 using Newtonsoft.Json;
 
 namespace HomeOrganizer.Logic;
@@ -33,15 +32,7 @@ public class StorageRepository : IStorageRepository
         // Default returns if no storage was found
         var result =  new Storage(key)
         {
-            StorageEntries = new IStorageEntry[]
-            {
-                new StorageEntry()
-                {
-                    StorageItem = new Fruit(FruitType.Grapefruit),
-                    ActualCount = 0,
-                    PreferredCount = 0
-                }
-            }
+            StorageEntries = Array.Empty<IStorageEntry>()
         };
         SaveStorage(result);
         return result;
@@ -51,15 +42,15 @@ public class StorageRepository : IStorageRepository
     {
         var storageJson = File.ReadAllText(_filePath);
         if (string.IsNullOrWhiteSpace(storageJson))
-            return new Storage[]
-            {
-                
-            };
+            return Array.Empty<Storage>();
 
         return JsonConvert.DeserializeObject<Storage[]>(storageJson, new JsonSerializerSettings()
         {
             Formatting = Formatting.Indented,
-            TypeNameHandling = TypeNameHandling.Objects
+            TypeNameHandling = TypeNameHandling.Objects,
+            ObjectCreationHandling = ObjectCreationHandling.Auto,
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+            MissingMemberHandling = MissingMemberHandling.Error
         });
     }
 

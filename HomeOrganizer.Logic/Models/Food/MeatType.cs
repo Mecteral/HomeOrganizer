@@ -3,5 +3,6 @@
 public enum MeatType
 {
     Chop,
-    Steak
+    Steak,
+    PulledPork
 }

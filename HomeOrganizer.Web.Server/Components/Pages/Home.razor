@@ -34,9 +34,6 @@
     </div>
 }
 
-
-
-
 @if (_storage != null)
 {
     <table>
@@ -44,6 +41,7 @@
             <th>Type</th>
             <th>Actual count</th>
             <th>Preferred count</th>
+            <th>Missing count</th>
             <th>Commands</th>
         </tr>
         @foreach (var entry in _storage.StorageEntries)
@@ -53,11 +51,28 @@
                 <td>@entry.ActualCount</td>
                 <td>@entry.PreferredCount</td>
                 <td>
+                    @if (HasMissingCount(entry))
+                    {
+                        <div>
+                            Yes
+                        </div>
+                    }
+                    else
+                    {
+                        <div>
+                            No
+                        </div>
+                    }
+                </td>
+                <td>
                     <button class="btn-primary" @onclick="@(() => Increase(entry))">
                         +
                     </button>
                     <button class="btn-primary" @onclick="@(() => Decrease(entry))">
                         -
+                    </button>
+                    <button class="btn-primary" @onclick="@(() => Remove(entry))">
+                        Remove
                     </button>
                 </td>
             </tr>
@@ -84,7 +99,7 @@
             @if (_isAddingVegetable)
             {
                 <select @bind="_selectedVegetableType">
-                    @foreach (var type in _vegetableTypes)
+                    @foreach (var type in _availableVegetableTypes)
                     {
                         <option value="@type">
                             @type.ToString()
@@ -95,7 +110,7 @@
             else if (_isAddingMeat)
             {
                 <select @bind="_selectedMeatType">
-                    @foreach (var type in _meatTypes)
+                    @foreach (var type in _availableMeatTypes)
                     {
                         <option value="@type">
                             @type.ToString()
@@ -106,7 +121,7 @@
             else if (_isAddingFruit)
             {
                 <select @bind="_selectedFruitType">
-                    @foreach (var type in _fruitTypes)
+                    @foreach (var type in _availableFruitTypes)
                     {
                         <option value="@type">
                             @type.ToString()
